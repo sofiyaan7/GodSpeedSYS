@@ -1,0 +1,7 @@
+streamlit
+gitpython
+markdown
+beautifulsoup4
+sentence-transformers
+chromadb
+requests
