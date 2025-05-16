@@ -1,6 +1,6 @@
 import requests
 from PIL import Image
-from transformers import BlipProcessor, BlipForConditionalGeneration
+# from transformers import BlipProcessor, BlipForConditionalGeneration
 from transformers import CLIPProcessor, CLIPModel
 import torch
 from sentence_transformers import SentenceTransformer
