@@ -10,14 +10,14 @@ embed_model = SentenceTransformer('all-MiniLM-L6-v2')
 client = PersistentClient(path="./chroma_db")
 collection = client.get_or_create_collection(name="gs_docs")
 
-blip_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to("cuda" if torch.cuda.is_available() else "cpu")
+# blip_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+# blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to("cuda" if torch.cuda.is_available() else "cpu")
 
-def generate_image_caption(image_path):
-    image = Image.open(image_path).convert('RGB')
-    inputs = blip_processor(image, return_tensors="pt").to(blip_model.device)
-    caption_ids = blip_model.generate(**inputs)
-    return blip_processor.decode(caption_ids[0], skip_special_tokens=True)
+# def generate_image_caption(image_path):
+#     image = Image.open(image_path).convert('RGB')
+#     inputs = blip_processor(image, return_tensors="pt").to(blip_model.device)
+#     caption_ids = blip_model.generate(**inputs)
+#     return blip_processor.decode(caption_ids[0], skip_special_tokens=True)
 
 def multimodal_query_openrouter(query, image_path=None, api_key="", top_k=5):
     query_embedding = embed_model.encode([query])[0]
