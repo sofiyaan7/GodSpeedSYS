@@ -3,6 +3,8 @@ from rag_engine import clone_or_update_repo, get_changed_md_files, chunk_documen
 from query_engine import multimodal_query_openrouter
 import os
 
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+
 st.set_page_config(page_title="Git RAG Chat", layout="wide")
 
 st.title("📚 GitHub Repo RAG Chatbot")
