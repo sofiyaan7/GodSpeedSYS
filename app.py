@@ -1,34 +1,48 @@
 import streamlit as st
-from utils.rag_pipeline import process_repo_and_embed, answer_query
+from rag_engine import clone_or_update_repo, get_changed_md_files, chunk_documents, update_chroma
+from query_engine import multimodal_query_openrouter
+import os
 
-st.set_page_config(page_title="RAG with Git Repo", layout="centered")
+st.set_page_config(page_title="Git RAG Chat", layout="wide")
 
-st.title("📚 GitHub Repo QA Assistant")
-st.write("Provide a GitHub repository URL and ask questions about its documentation.")
+st.title("📚 GitHub Repo RAG Chatbot")
 
-repo_url = st.text_input("🔗 Enter GitHub Repo URL", "")
-process_button = st.button("🔄 Process Repo")
+git_url = st.text_input("Enter GitHub Repository URL:")
+branch = st.text_input("Enter branch name:", value="main")
+api_key = st.text_input("Enter your OpenRouter API Key:", type="password")
 
-if "repo_ready" not in st.session_state:
-    st.session_state.repo_ready = False
+if st.button("🛠️ Process Repo"):
+    if git_url:
+        doc_path, updated = clone_or_update_repo(git_url, branch)
+        if updated:
+            st.info("Repository updated. Processing files...")
+            md_files = get_changed_md_files(doc_path)
+            chunks = chunk_documents(md_files)
+            update_chroma(chunks)
+            st.success("Embedding complete and added to ChromaDB.")
+        else:
+            st.warning("No new updates in the repo.")
+    else:
+        st.error("Please enter a valid GitHub URL.")
 
-if process_button and repo_url:
-    with st.spinner("Cloning and embedding repo..."):
-        try:
-            process_repo_and_embed(repo_url)
-            st.session_state.repo_ready = True
-            st.success("Repository processed and embedded successfully!")
-        except Exception as e:
-            st.error(f"Error: {e}")
-            st.session_state.repo_ready = False
+st.markdown("---")
+st.subheader("💬 Ask a Question")
+query = st.text_input("Enter your question here:")
+image = st.file_uploader("Optional: Upload an image", type=["png", "jpg", "jpeg"])
 
-if st.session_state.repo_ready:
-    user_query = st.text_input("💬 Ask a question about the documentation")
-    if st.button("Ask"):
-        with st.spinner("Generating answer..."):
-            try:
-                response = answer_query(user_query)
-                st.success("Answer:")
-                st.write(response)
-            except Exception as e:
-                st.error(f"Error: {e}")
+if st.button("🔍 Query"):
+    if not api_key:
+        st.error("Please provide your OpenRouter API Key.")
+    elif not query:
+        st.warning("Enter a query to proceed.")
+    else:
+        image_path = None
+        if image:
+            image_path = os.path.join("temp", image.name)
+            os.makedirs("temp", exist_ok=True)
+            with open(image_path, "wb") as f:
+                f.write(image.read())
+        with st.spinner("Querying..."):
+            response = multimodal_query_openrouter(query, image_path, api_key)
+            st.markdown("### 📥 Response")
+            st.write(response)
