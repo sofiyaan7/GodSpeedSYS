@@ -2,6 +2,8 @@ import streamlit as st
 from rag_engine import clone_or_update_repo, get_changed_md_files, chunk_documents, update_chroma
 from query_engine import multimodal_query_openrouter
 import os
+from chromadb import PersistentClient
+
 
 import sys
 import pysqlite3
