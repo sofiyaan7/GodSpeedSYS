@@ -8,3 +8,4 @@ markdown
 beautifulsoup4
 transformers
 Pillow
+pysqlite3-binary>=0.5.2
